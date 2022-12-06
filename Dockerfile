@@ -51,12 +51,3 @@ RUN mkdir .git \
 # Copy source code.
 COPY lib/ lib/
 COPY scripts/ scripts/
-
-# Copy config files.
-COPY config/ config/
-
-# Set environment variables.
-ARG GIT_COMMIT
-ARG DOCKER_IMAGE
-ENV GIT_COMMIT=${GIT_COMMIT}
-ENV DOCKER_IMAGE=${DOCKER_IMAGE}
