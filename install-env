@@ -1,0 +1,90 @@
+#!/bin/bash
+#
+# Bash script to install and configure conda environment for the project.
+#
+# Usage: install-env [-p <install path>] [-c <cache path>] [-n <env name>]
+#           -R: remove existing environment (and tox working directory) if it exists and then install fresh environment
+#           -p: install path, defaults ".conda" directory within repo root
+#           -n: conda environment name, defaults to DEFAULT_ENV_NAME
+#
+# Supports x86/x64 Mac OSX and Linux.
+#
+# Script should follow style guide: https://google.github.io/styleguide/shellguide.html
+
+#############
+# Constants #
+#############
+
+# Command line options.
+readonly GETOPTS_STR="Rp:n:"
+
+# Absolute path of the directory containing this file.
+FILE_DIR_PATH="$(dirname "$(realpath "$0")")"
+readonly FILE_DIR_PATH
+# Root directory of repository (this one).
+readonly REPO_ROOT="${FILE_DIR_PATH}"
+
+# Environment file path.
+readonly DEFAULT_ENV_NAME="storage-eval"
+
+# Install Versions.
+readonly CONDA_VERSION="4.12.0"
+readonly PY_VERSION="py39"
+
+#################
+# Main Function #
+#################
+
+main() {
+  # Process options.
+  while getopts "${GETOPTS_STR}" option; do
+    case "${option}" in
+      R) local remove_existing="true";;
+      p) local conda_root="${OPTARG}";;
+      n) local env_name="${OPTARG}";;
+    esac
+  done
+
+  # Set defaults.
+  local conda_root=${conda_root:-"${REPO_ROOT}/.conda"}
+  local env_name=${env_name:-${DEFAULT_ENV_NAME}}
+
+  # Remove existing install if requested.
+  if [[ ${remove_existing} && -d "${conda_root}" ]]; then
+    echo "Deleting existing environment at ${conda_root} ..."
+    if ! 2>/dev/null 1>/dev/null rm -rf "${conda_root}" ; then
+      err_exit "Failed to remove existing environment at ${conda_root}"
+    fi
+
+    # Also remove the tox environment in the repo.
+    local tox_workdir="${REPO_ROOT}/.tox"
+    echo "Deleting existing tox working directory at ${tox_workdir} ..."
+    if ! 2>/dev/null 1>/dev/null rm -rf "${tox_workdir}" ; then
+      err_exit "Failed to remove tox working dir at ${tox_workdir}"
+    fi
+  fi
+
+  # Run all install steps.
+  bash "${REPO_ROOT}/.setup/conda.sh" -p "${conda_root}" -v "${CONDA_VERSION}" -i "${PY_VERSION}" \
+    && bash "${REPO_ROOT}/.setup/base.sh" -p "${conda_root}" \
+    && bash "${REPO_ROOT}/.setup/env.sh" -p "${conda_root}" -n "${env_name}" \
+    && "${conda_root}/bin/python" "${REPO_ROOT}/.setup/check-versions.py" \
+    && bash "${REPO_ROOT}/.setup/direnv.sh"
+  # shellcheck disable=SC2181
+  if [[ $? -ne 0 ]]; then
+    err_exit "Failed to install environment"
+  fi
+
+  echo ""
+  print_green "${env_name} environment fully installed and activated"
+}
+
+####################
+# Top-Level Script #
+####################
+
+# Load colors library.
+source "${REPO_ROOT}/.setup/lib-colors.sh"
+
+# Run main.
+main "$@"

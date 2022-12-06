@@ -1,0 +1,3 @@
+# Don't follow source statement and ignore warning.
+external-sources=false
+disable=SC1091
