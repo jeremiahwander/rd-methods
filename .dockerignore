@@ -1,0 +1,10 @@
+.git/
+.conda/
+.cache/
+.log/
+.azcopy/
+.coverage/
+.testresults/
+.mypy_cache/
+.azure-pipelines/
+.envrc

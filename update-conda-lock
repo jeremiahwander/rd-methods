@@ -1,0 +1,108 @@
+#!/bin/bash
+#
+# Bash script to update the conda lock files for all supported platforms (see PLATFORMS constant).
+#
+# Usage: update-conda-lock [-p <conda-lock path>] [-f <path to environment YAML file>] [-l <path to log file>]
+#           -E: exit with error code 11 if new lock files are generated
+#               Useful for detecting lock files out of sync with environment YAML file
+#           -p: path to conda-lock executable, defaults to "${CONDA_EXE}-lock"
+#               The default path assumes that conda-lock is installed in the base conda environment
+#               and a conda environment is activated (conda will automatically define $CONDA_EXE)
+#           -f: path to conda environment YAML file, defaults to "environment.yml" within repo root
+#           -l: path to create log file, defaults to ".log/conda-lock.log" within repo root
+#
+# Script should follow style guide: https://google.github.io/styleguide/shellguide.html
+
+#############
+# Constants #
+#############
+
+# Command line options.
+readonly GETOPTS_STR="Ep:f:l:"
+
+# Absolute path of the directory containing this file.
+FILE_DIR_PATH=$(dirname "$(realpath "$0")")
+readonly FILE_DIR_PATH
+# Root directory of repository (this one).
+readonly REPO_ROOT="${FILE_DIR_PATH}"
+
+# Supported platforms (lock files will be generated for these platforms).
+readonly PLATFORMS=( \
+  "linux-64" \
+)
+
+#################
+# Main Function #
+#################
+
+main() {
+  # Process options.
+  while getopts "${GETOPTS_STR}" option; do
+    case "${option}" in
+      E) local error_on_update="true";;
+      p) local conda_lock="${OPTARG}";;
+      f) local env_file="${OPTARG}";;
+      l) local log_file="${OPTARG}";;
+    esac
+  done
+
+  # Set defaults.
+  local conda_lock=${conda_lock:-"${CONDA_EXE}-lock"}
+  local env_file=${env_file:-"${REPO_ROOT}/environment.yml"}
+  local log_file=${log_file:-"${REPO_ROOT}/.log/conda-lock.log"}
+
+  # Check that conda-lock is found.
+  if ! 2>/dev/null 1>/dev/null "${conda_lock}" --help ; then
+    err_exit "conda-lock executable not found at ${conda_lock}"
+  fi
+
+  # Use mamba if found, otherwise use conda.
+  local conda_bin_dir
+  conda_bin_dir=$(dirname "${conda_lock}")
+  local conda_exe="${conda_bin_dir}/mamba"
+  if [[ ! -f "${conda_exe}" ]]; then
+    echo "mamba not found, using conda"
+    local conda_exe="${conda_bin_dir}/conda"
+  fi
+
+  # Generate unified conda lock file for all platforms (conda-lock.yml).
+  makedirs_exit_on_fail "$(dirname "${log_file}")"
+  local platform_args
+  platform_args=$(joinByStringSep " -p " "${PLATFORMS[@]}") # Equivalent to python code: " -p ".join(PLATFORMS)
+  echo "Generating conda lock files with locked environment dependencies (might take a while)..."
+  # shellcheck disable=2086 # word splitting is desired
+  if ! "${conda_lock}" lock --conda "${conda_exe}" --check-input-hash -p ${platform_args} -f "${env_file}" 2> "${log_file}" ; then 
+    err_exit "Failed to lock conda environment (see errors in ${log_file})"
+  fi
+
+  # Parse log file to determine if new lock files generated.
+  if grep -q 'Install lock using' "${log_file}" ; then # New lock file generated.
+
+    # Generate conda "env-type" versions of the lock file for all supported platforms (conda-{platform}.lock.yml).
+    # These are used by tox and other applications which cannot directly work with the conda-lock.yml file.
+    if ! 2>/dev/null 1>/dev/null  "${conda_lock}" render -k env ; then 
+      err_exit "Failed to render conda env type lock files"
+    fi
+
+    print_green "Generated new conda lock files"
+    print_yellow "Please do the following:"
+    print_yellow "\t1. Commit all changes to lock files"
+    print_yellow "\t2. Re-build conda environment (ie, run './install-env -R' or rebuild container)"
+    if [[ $error_on_update ]]; then
+      exit 11
+    fi
+
+  else 
+    echo "Conda lock files already up to date, no changes made."
+  fi
+}
+
+####################
+# Top-Level Script #
+####################
+
+# Load colors library.
+source "${REPO_ROOT}/.setup/lib-colors.sh"
+
+# Run main.
+main "$@"

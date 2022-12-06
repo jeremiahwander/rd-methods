@@ -1,0 +1,73 @@
+# Bash script to setup/activate the conda environment for the project.
+# This should not be run as script, but sourced into the active shell from the repo root directory.
+#
+# Usage: source setup-shell [-p <install path>] [-n <env name>]
+#           -p: conda root path, defaults to ".conda" directory within repo root
+#           -n: conda environment name, defaults to DEFAULT_ENV_NAME
+#
+# Script should follow style guide: https://google.github.io/styleguide/shellguide.html
+
+# shellcheck shell=bash
+
+#############
+# Constants #
+#############
+# Note these are not defined as readonly so that the file can be sourced multiple times.
+
+# Command line options.
+GETOPTS_STR="p:n:"
+
+# Relative path to root directory of repository (this one).
+REPO_ROOT="."
+
+# Environment file path.
+DEFAULT_ENV_NAME="storage-eval"
+
+#################
+# Main Function #
+#################
+
+main() {
+  # Abort if not run from repo root.
+  if [[ ! -d ".git" ]]; then
+    echo "ERROR: Must source script from repo root directory"
+    return
+  fi
+
+  # Process options.
+  while getopts "${GETOPTS_STR}" option; do
+    case "${option}" in
+      p) local conda_root="${OPTARG}";;
+      n) local env_name="${OPTARG}";;
+    esac
+  done
+
+  # Set defaults.
+  local conda_root=${conda_root:-"${REPO_ROOT}/.conda"}
+  local env_name=${env_name:-${DEFAULT_ENV_NAME}}
+
+  # Activate environment.
+  if ! source "${conda_root}/bin/activate" "${env_name}" ; then
+    echo "ERROR: Failed to activate ${env_name} environment" >&2
+    return
+  fi
+
+  # Use poetry to install local library.
+  if ! 2>/dev/null 1>/dev/null poetry install --no-interaction ; then
+    echo "ERROR: Failed to install local library using Poetry" >&2
+    return
+  fi
+
+  # Define environment variable with path to activated python environment.
+  PROJ_VENV=$(realpath "${conda_root}/envs/${env_name}")
+  export PROJ_VENV
+
+  echo "Conda environment ${env_name} activated"
+}
+
+####################
+# Top-Level Script #
+####################
+
+# Run main.
+main "$@"

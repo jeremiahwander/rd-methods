@@ -1,0 +1,87 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.vscode-pylance",
+            "mhutchie.git-graph",
+            "davidanson.vscode-markdownlint",
+            "rogalmic.bash-debug",
+            "timonwong.shellcheck",
+            "oderwat.indent-rainbow",
+            "mechatroner.rainbow-csv",
+        ]
+    },
+    "settings": {
+        "files.exclude": {
+            "**/*.pyc": true,
+            "**/.mypy_cache/": true,
+            "**/__pycache__/": true,
+            "**/.ipynb_checkpoints/": true,
+            "**/.tox/": true,
+            "**/.pytest_cache/": true,
+            "**/.coverage": true,
+            "**/.testresults/": true,
+            ".conda/": true,
+            ".cache/": true,
+            ".docker/": true
+        },
+        "editor.rulers": [120],
+        "editor.bracketPairColorization.enabled": true,
+        // Set default indentation of 4 spaces.
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4,
+        // Linux shell scripts (sh, bash, zsh, etc.) should be indented using 2 spaces.
+        "[shellscript]": {
+            "editor.tabSize": 2,
+            "files.eol": "\n"
+        },
+        "python.defaultInterpreterPath": "${env:PROJ_VENV}/bin/python",
+        "python.analysis.typeCheckingMode": "basic",
+        "python.linting.enabled": true,
+        "python.linting.ignorePatterns": [
+            "**/site-packages/**/*.py",
+            ".vscode/*.py",
+            "test/**/*.py"
+        ],
+        "python.linting.flake8Enabled": true,
+        "python.linting.mypyEnabled": true,
+        "python.linting.mypyCategorySeverity.error": "Warning",
+        "python.linting.banditEnabled": true,
+        "python.linting.banditArgs": ["-c", "${workspaceFolder}/pyproject.toml"],
+        "python.formatting.provider": "black",
+        "python.terminal.activateEnvironment": false,
+        "[python]": {
+            "editor.tabSize": 4,
+            "editor.formatOnSave": true,
+            "editor.codeActionsOnSave": {
+                "source.organizeImports": true
+            },
+        },
+
+        // Exclude the following system python executables from the Jupyter kernel selection UI
+        // in order to help Jupyter to select the correct kernel.
+        "jupyter.kernels.filter": [
+            {
+                "path": "/bin/python",
+                "type": "pythonEnvironment"
+            },
+            {
+                "path": "/bin/python3",
+                "type": "pythonEnvironment"
+            },
+            {
+                "path": "/usr/bin/python",
+                "type": "pythonEnvironment"
+            },
+            {
+                "path": "/usr/bin/python3",
+                "type": "pythonEnvironment"
+            }
+        ]
+    }
+}

@@ -1,0 +1,55 @@
+# Poetry is used on top of conda in order to install the local library.
+# All package dependencies should be managed by conda.
+[tool.poetry]
+name = "lib"
+version = "0.0.0" # This is unused.
+description = "local repo library"
+authors = ["Microsoft Biomedical Computing Group <BiomedComp@microsoft.com>"]
+
+[tool.poetry.scripts]
+compression-experiment = "lib.compression_experiment.run_experiment:main"
+start-coa-comp-exp = "lib.compression_experiment.start_coa_run:main"
+fastq-split = "lib.fastq.scripts.split:main"
+cram2fastq = "lib.cram.scripts.cram2fastq:main"
+cram2cram = "lib.cram.scripts.cram2cram:main"
+cramlog2channels = "lib.cram.scripts.cramlog2channels:main"
+cram2bam = "lib.cram.scripts.cram2bam:main"
+fastq2ucram = "lib.cram.scripts.fastq2ucram:main"
+fastq2ubam = "lib.cram.scripts.fastq2ubam:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+# Flake8 does not support configuration in this file, so it's configured in .flake8
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.mypy]
+pretty = true
+ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+
+# Asserts are OK in test code.
+[tool.bandit.assert_used]
+skips = ['test/*']
+
+[tool.pytest.ini_options]
+# JUnit configuration for publishing test results to ADO in CI pipeline.
+junit_family = "xunit2"
+junit_logging = "all"
+# Explanation of additional options used:
+#   -vv                 Increase verbosity twice
+#   --strict-markers    Don't allow unregistered markers
+#   --import-mode       Use the more advanced importlib for importing modules rather than modifying sys.path
+#   --cov=lib           Generate coverage report for all files within "lib" directory
+#   --cov-report=term-missing:skip-covered  Generate coverage report in terminal, but skip files with 100% coverage
+#   --cov-report=html:.testresults/htmlcov  Generate HTML coverage report
+addopts = '-vv --strict-markers --import-mode=importlib --cov=lib --cov-report=term-missing:skip-covered --cov-report=html:.testresults/htmlcov'

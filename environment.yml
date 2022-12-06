@@ -1,0 +1,43 @@
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.8
+  - poetry>=1.1
+  - ipykernel
+  - jinja2
+  - pydantic
+  - pandas
+  - matplotlib
+  - numpy
+  - commentjson
+  - semantic_version
+  - psutil
+  - samtools>=1.14
+  - conda-forge::ncurses  # conda-forge version required for samtools.
+  - genozip
+  - spring
+  - pip:
+    - sigfig
+
+  # Dependencies used for code development (linting, testing, etc.)
+  - tox
+  - tox-conda
+  - black-jupyter
+  - isort
+  - flake8
+  - pep8-naming
+  - flake8-bugbear
+  - flake8-comprehensions
+  - flake8-docstrings
+  - flake8-eradicate
+  - flake8-noqa
+  - flake8-isort
+  - flake8-black
+  - bandit
+  - mypy
+  - types-python-dateutil
+  - pytest
+  - pytest-cov
+  - pytest-mock
