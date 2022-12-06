@@ -6,17 +6,6 @@ version = "0.0.0" # This is unused.
 description = "local repo library"
 authors = ["Microsoft Biomedical Computing Group <BiomedComp@microsoft.com>"]
 
-[tool.poetry.scripts]
-compression-experiment = "lib.compression_experiment.run_experiment:main"
-start-coa-comp-exp = "lib.compression_experiment.start_coa_run:main"
-fastq-split = "lib.fastq.scripts.split:main"
-cram2fastq = "lib.cram.scripts.cram2fastq:main"
-cram2cram = "lib.cram.scripts.cram2cram:main"
-cramlog2channels = "lib.cram.scripts.cramlog2channels:main"
-cram2bam = "lib.cram.scripts.cram2bam:main"
-fastq2ucram = "lib.cram.scripts.fastq2ucram:main"
-fastq2ubam = "lib.cram.scripts.fastq2ubam:main"
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
