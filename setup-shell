@@ -21,7 +21,7 @@ GETOPTS_STR="p:n:"
 REPO_ROOT="."
 
 # Environment file path.
-DEFAULT_ENV_NAME="storage-eval"
+DEFAULT_ENV_NAME="rd-methods"
 
 #################
 # Main Function #

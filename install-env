@@ -25,7 +25,7 @@ readonly FILE_DIR_PATH
 readonly REPO_ROOT="${FILE_DIR_PATH}"
 
 # Environment file path.
-readonly DEFAULT_ENV_NAME="storage-eval"
+readonly DEFAULT_ENV_NAME="rd-methods"
 
 # Install Versions.
 readonly CONDA_VERSION="4.12.0"
