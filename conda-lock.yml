@@ -19,7 +19,7 @@ metadata:
   - url: bioconda
     used_env_vars: []
   content_hash:
-    linux-64: 3eb3ecdacdc7fbe4e20e4c900df567f0dfa247b6bc03af91348ee9378cd77010
+    linux-64: de3614e7e005669af6a9fd2fe5b96b8c6dc2bf4466c5863cbfbe3d2e787f3452
   platforms:
   - linux-64
   sources:
@@ -83,17 +83,6 @@ package:
 - category: main
   dependencies: {}
   hash:
-    md5: 1030b1f38c129f2634eae026f704fe60
-    sha256: 0289e6a7b9a5249161a3967909e12dcfb4ab4475cdede984635d3fb65c606f08
-  manager: conda
-  name: libstdcxx-ng
-  optional: false
-  platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libstdcxx-ng-12.2.0-h46fd767_19.tar.bz2
-  version: 12.2.0
-- category: main
-  dependencies: {}
-  hash:
     md5: 833facc4bfeebcb61babe76257e8c9e8
     sha256: bfddf345a66e227d91d57fce85a6a31dfc848f9dfee0c25d7244ce66c75d2940
   manager: conda
@@ -127,6 +116,18 @@ package:
   platform: linux-64
   url: https://conda.anaconda.org/conda-forge/linux-64/libgomp-12.2.0-h65d4601_19.tar.bz2
   version: 12.2.0
+- category: main
+  dependencies:
+    __glibc: '>=2.17'
+  hash:
+    md5: 57623d10a70e09e1d048c2b2b6f4e2dd
+    sha256: 4da22842de544990e623ed38dfd9b468cc26cc592a102e41bcf45c91bcce9aa2
+  manager: conda
+  name: libstdcxx-ng
+  optional: false
+  platform: linux-64
+  url: https://repo.anaconda.com/pkgs/main/linux-64/libstdcxx-ng-11.2.0-h1234567_1.conda
+  version: 11.2.0
 - category: main
   dependencies:
     _libgcc_mutex: 0.1 conda_forge
@@ -1479,16 +1480,16 @@ package:
   version: '3.11'
 - category: main
   dependencies:
-    python: ''
+    python: '>=3.10,<3.11.0a0'
   hash:
-    md5: dd36e0a3aa1d3788576bfabc0b9a113d
-    sha256: eb9bbaac457676121ed3de136f00da3e90ef6bc5852dc57f770147de94bfcbc3
+    md5: 8b9d1029a6a3f2a5a0475c041be4c548
+    sha256: d5ad37496a615d8b86d49c214e142ae39676a97d4ceb000b80236e1ad9246d84
   manager: conda
   name: poetry-core
   optional: false
   platform: linux-64
-  url: https://repo.anaconda.com/pkgs/main/noarch/poetry-core-1.0.3-pyhd3eb1b0_0.conda
-  version: 1.0.3
+  url: https://repo.anaconda.com/pkgs/main/linux-64/poetry-core-1.4.0-py310h06a4308_0.conda
+  version: 1.4.0
 - category: main
   dependencies:
     libgcc-ng: '>=11.2.0'
