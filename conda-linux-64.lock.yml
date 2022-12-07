@@ -90,7 +90,7 @@ dependencies:
   - distlib=0.3.6=py311h06a4308_0
   - entrypoints=0.4=py310h06a4308_0
   - eradicate=2.1.0=pyhd8ed1ab_0
-  - et_xmlfile=1.1.0=py311h06a4308_0
+  - et_xmlfile=1.1.0=py310h06a4308_0
   - executing=0.8.3=pyhd3eb1b0_0
   - filelock=3.9.0=py311h06a4308_0
   - flit-core=3.8.0=py311h06a4308_0
@@ -172,14 +172,14 @@ dependencies:
   - genozip=14.0.17=h7f98852_0
   - gitdb=4.0.7=pyhd3eb1b0_0
   - html5lib=1.1=pyhd3eb1b0_0
-  - importlib-metadata=6.0.0=py311h06a4308_0
-  - jaraco.classes=3.2.1=pyhd3eb1b0_0
-  - jedi=0.18.1=py311h06a4308_1
-  - jinja2=3.1.2=py311h06a4308_0
-  - jsonschema=4.17.3=py311h06a4308_0
-  - matplotlib-inline=0.1.6=py311h06a4308_0
-  - numpy=1.23.5=py311h5585df3_0
-  - openpyxl=3.0.10=py311h5eee18b_0
+  - importlib-metadata=4.11.3=py310h06a4308_0
+  - jedi=0.18.1=py310h06a4308_1
+  - jinja2=3.1.2=py310h06a4308_0
+  - jupyter_core=4.11.2=py310h06a4308_0
+  - matplotlib-inline=0.1.6=py310h06a4308_0
+  - numpy=1.23.4=py310hac523dd_0
+  - openpyxl=3.0.10=py310h5eee18b_0
+  - packaging=20.9=pyhd3eb1b0_0
   - pexpect=4.8.0=pyhd3eb1b0_3
   - pillow=9.4.0=py311h6a678d5_0
   - pip=23.0.1=py311h06a4308_0
@@ -212,11 +212,12 @@ dependencies:
   - rapidfuzz=2.13.7=py311ha02d727_0
   - rich=12.5.1=py311h06a4308_0
   - stack_data=0.2.0=pyhd3eb1b0_0
-  - typing-extensions=4.4.0=py311h06a4308_0
-  - cleo=2.0.1=py311h06a4308_0
-  - flake8-bugbear=23.3.12=pyhd8ed1ab_0
-  - flake8-comprehensions=3.12.0=pyhd8ed1ab_0
-  - flake8-docstrings=1.7.0=pyhd8ed1ab_0
+  - tox=3.27.1=pyhd8ed1ab_0
+  - typing-extensions=4.4.0=py310h06a4308_0
+  - flake8-black=0.3.5=pyhd8ed1ab_0
+  - flake8-bugbear=22.12.6=pyhd8ed1ab_0
+  - flake8-comprehensions=3.10.1=pyhd8ed1ab_0
+  - flake8-docstrings=1.6.0=pyhd8ed1ab_0
   - flake8-eradicate=1.4.0=pyhd8ed1ab_0
   - flake8-isort=6.0.0=pyhd8ed1ab_0
   - flake8-noqa=1.2.9=pyhd8ed1ab_0
