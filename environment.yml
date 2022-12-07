@@ -9,6 +9,7 @@ dependencies:
   - jinja2
   - pydantic
   - pandas
+  - openpyxl
   - matplotlib
   - numpy
   - openpyxl

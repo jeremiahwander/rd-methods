@@ -1115,15 +1115,15 @@ package:
   version: 2.1.0
 - category: main
   dependencies:
-    python: '>=3.11,<3.12.0a0'
+    python: '>=3.10,<3.11.0a0'
   hash:
-    md5: eac287d1ee34bdaf7e8c9a1ee26356cb
-    sha256: 69f6fcd0738e66af1a1cffc2f49e70b70175f67f7e5f88ad604d998e0f7ee8a6
+    md5: 393287c24fffb60e25b6dd4c290b437f
+    sha256: a4e896adeb87fe91c7ef0eb2dd5ebaf49ecf1c15f4e04664da4a0feab08be839
   manager: conda
   name: et_xmlfile
   optional: false
   platform: linux-64
-  url: https://repo.anaconda.com/pkgs/main/linux-64/et_xmlfile-1.1.0-py311h06a4308_0.conda
+  url: https://repo.anaconda.com/pkgs/main/linux-64/et_xmlfile-1.1.0-py310h06a4308_0.conda
   version: 1.1.0
 - category: main
   dependencies:
@@ -2256,7 +2256,21 @@ package:
   dependencies:
     et_xmlfile: ''
     libgcc-ng: '>=11.2.0'
-    python: '>=3.11,<3.12.0a0'
+    python: '>=3.10,<3.11.0a0'
+  hash:
+    md5: 2e570037bdef24d2efeeccb6ea7cb14a
+    sha256: 462b1f36a8509691f0a0b05d26aedf66c02cdcc27d4be458d9bcd23ba5243ac3
+  manager: conda
+  name: openpyxl
+  optional: false
+  platform: linux-64
+  url: https://repo.anaconda.com/pkgs/main/linux-64/openpyxl-3.0.10-py310h5eee18b_0.conda
+  version: 3.0.10
+- category: main
+  dependencies:
+    pyparsing: '>=2.0.2'
+    python: ''
+    six: ''
   hash:
     md5: e5a74318b4e03731f8ba71101d2399da
     sha256: df0e76ddc1fed021ee78360c4410162962adba5c5e2ea3eebc087435bce81311
@@ -2801,14 +2815,14 @@ package:
     flake8: '>=3.0'
     python: '>=3.7'
   hash:
-    md5: 96b9e84a2360b424e7e15d5033efb981
-    sha256: 71d0cb115e69c3554ff37a3ca32a42a15ca36db0c8eb6226c2e37eaa5b079115
+    md5: 199fd15a05a7f15aef8fa705af1cf6e0
+    sha256: b6d87ffde6935f0a74f1af8ea76b05913f5771b50451e13547d009f9c6c619ae
   manager: conda
   name: flake8-bugbear
   optional: false
   platform: linux-64
-  url: https://conda.anaconda.org/conda-forge/noarch/flake8-bugbear-23.3.12-pyhd8ed1ab_0.conda
-  version: 23.3.12
+  url: https://conda.anaconda.org/conda-forge/noarch/flake8-bugbear-22.12.6-pyhd8ed1ab_0.conda
+  version: 22.12.6
 - category: main
   dependencies:
     flake8: '>=3.0,!=3.2.0'
