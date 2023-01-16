@@ -58,7 +58,7 @@ class XlsxPedigreeParser:
             axis=1,
         )
 
-    def parse(self) -> Pedigree:
+    def parse(self, sheet:str = None) -> Pedigree:
         """Parse the xlsx file and return a Pedigree object.
 
         Will raise an error if the following columns are not present:
@@ -68,10 +68,13 @@ class XlsxPedigreeParser:
         - SEX (values must be one of: Female, Male)
         - AFFECTED STATUS (values must be one of: Affected, Unaffected)
         """
-        df = pd.read_excel(self.src)
+        dfs = pd.read_excel(self.src, sheet_name=None)
 
-        df = self._clean_columns(df)
+        for sheet_name, df in dfs.items():
+            dfs[sheet_name] = self._clean_columns(df)
 
+        df = pd.concat(dfs.values(), ignore_index=True)
+        
         # Generate the father/mother columns.
         df["is_child"] = df["subject_id"].str.endswith("3") | df["subject_id"].str.endswith("4")
         df["paternal_id"] = self._assign_parent(df, "Father")
