@@ -15,6 +15,7 @@ https://controlleddata.blob.core.windows.net/rgp/joint-called-vcf_20221114/RGP_C
 """
 
 import os
+from typing import Optional
 
 import click
 import pandas as pd
@@ -58,8 +59,10 @@ class XlsxPedigreeParser:
             axis=1,
         )
 
-    def parse(self, sheet:str = None) -> Pedigree:
+    def parse(self, sheet: Optional[str] = None) -> Pedigree:
         """Parse the xlsx file and return a Pedigree object.
+
+        Optionally provide a sheet name to parse a single sheet.
 
         Will raise an error if the following columns are not present:
         - family_id
@@ -68,13 +71,17 @@ class XlsxPedigreeParser:
         - SEX (values must be one of: Female, Male)
         - AFFECTED STATUS (values must be one of: Affected, Unaffected)
         """
-        dfs = pd.read_excel(self.src, sheet_name=None)
+        if not sheet:
+            dfs = pd.read_excel(self.src, sheet_name=None)
 
-        for sheet_name, df in dfs.items():
-            dfs[sheet_name] = self._clean_columns(df)
+            for sheet_name, df in dfs.items():
+                dfs[sheet_name] = self._clean_columns(df)
 
-        df = pd.concat(dfs.values(), ignore_index=True)
-        
+            df = pd.concat(dfs.values(), ignore_index=True)
+        else:
+            df = pd.read_excel(self.src, sheet_name=sheet)
+            df = self._clean_columns(df)
+
         # Generate the father/mother columns.
         df["is_child"] = df["subject_id"].str.endswith("3") | df["subject_id"].str.endswith("4")
         df["paternal_id"] = self._assign_parent(df, "Father")
@@ -98,14 +105,15 @@ class XlsxPedigreeParser:
 @click.command()
 @click.option("--xlsx_path", required=True, type=click.Path(exists=True))
 @click.option("--fam_path", default=None)
+@click.option("--sheet", default=None)
 @click.option("--overwrite", is_flag=True, default=False)
-def main(xlsx_path: str, fam_path: str, overwrite: bool) -> None:
+def main(xlsx_path: str, fam_path: str, sheet: str, overwrite: bool) -> None:
     if not fam_path:
         fam_path = xlsx_path + ".fam"
     if os.path.exists(fam_path) and not overwrite:
         raise ValueError("The destination for --fam_path exists, set the --overwrite flag and re-run to overwrite.")
 
-    ped = XlsxPedigreeParser(xlsx_path).parse()
+    ped = XlsxPedigreeParser(xlsx_path).parse(sheet=sheet)
     ped.write_to_file(fam_path)
 
     print("Successfully wrote FAM file to: " + fam_path)
