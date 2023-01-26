@@ -1,8 +1,7 @@
 """Ingest the RGP meta-data xlsx and generate a corresponding plink-formatted FAM file.
 
 File of interest can be localized to the tempdir with the following commands on an Azure VM:
-sudo mkdir /mnt/data
-sudo chmod a+rw /mnt/data
+sudo mkdir /mnt/data -m a+rw
 
 az storage blob download -n /joint-called-vcf_20221114/RGP_Cases_for_MSFT_AIP_v0_trial.xlsx -c rgp --account-name \
 controlleddata -f /mnt/data/RGP_Cases_for_MSFT_AIP_v0_trial.xlsx --auth-mode login
