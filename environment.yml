@@ -11,6 +11,7 @@ dependencies:
   - pandas
   - matplotlib
   - numpy
+  - openpyxl
   - commentjson
   - semantic_version
   - samtools>=1.14

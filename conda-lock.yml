@@ -19,7 +19,7 @@ metadata:
   - url: bioconda
     used_env_vars: []
   content_hash:
-    linux-64: 30a6dde9835d523e9e07699e552ee34f12dcc4f1118c58e47be0ed35187dbee4
+    linux-64: 25382ee256dacb7132504f1745eda192cd5b52ff7db8e45e97f1004727876e2e
   platforms:
   - linux-64
   sources:
@@ -1113,6 +1113,18 @@ package:
   platform: linux-64
   url: https://conda.anaconda.org/conda-forge/noarch/eradicate-2.1.0-pyhd8ed1ab_0.tar.bz2
   version: 2.1.0
+- category: main
+  dependencies:
+    python: '>=3.11,<3.12.0a0'
+  hash:
+    md5: eac287d1ee34bdaf7e8c9a1ee26356cb
+    sha256: 69f6fcd0738e66af1a1cffc2f49e70b70175f67f7e5f88ad604d998e0f7ee8a6
+  manager: conda
+  name: et_xmlfile
+  optional: false
+  platform: linux-64
+  url: https://repo.anaconda.com/pkgs/main/linux-64/et_xmlfile-1.1.0-py311h06a4308_0.conda
+  version: 1.1.0
 - category: main
   dependencies:
     python: '>=2.7'
@@ -2240,6 +2252,20 @@ package:
   platform: linux-64
   url: https://repo.anaconda.com/pkgs/main/linux-64/numpy-1.23.5-py311h5585df3_0.conda
   version: 1.23.5
+- category: main
+  dependencies:
+    et_xmlfile: ''
+    libgcc-ng: '>=11.2.0'
+    python: '>=3.11,<3.12.0a0'
+  hash:
+    md5: e5a74318b4e03731f8ba71101d2399da
+    sha256: df0e76ddc1fed021ee78360c4410162962adba5c5e2ea3eebc087435bce81311
+  manager: conda
+  name: openpyxl
+  optional: false
+  platform: linux-64
+  url: https://repo.anaconda.com/pkgs/main/linux-64/openpyxl-3.0.10-py311h5eee18b_0.conda
+  version: 3.0.10
 - category: main
   dependencies:
     ptyprocess: '>=0.5'
