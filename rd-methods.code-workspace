@@ -82,6 +82,7 @@
                 "path": "/usr/bin/python3",
                 "type": "pythonEnvironment"
             }
-        ]
+        ],
+        "editor.codeActionsOnSave": {}
     }
 }
