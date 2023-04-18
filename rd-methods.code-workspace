@@ -53,7 +53,7 @@
         "python.linting.mypyCategorySeverity.error": "Warning",
         "python.linting.banditEnabled": true,
         "python.linting.banditArgs": ["-c", "${workspaceFolder}/pyproject.toml"],
-        "python.formatting.provider": "black",
+        "python.formatting.provider": "none",
         "python.terminal.activateEnvironment": false,
         "[python]": {
             "editor.tabSize": 4,
@@ -61,6 +61,7 @@
             "editor.codeActionsOnSave": {
                 "source.organizeImports": true
             },
+            "editor.defaultFormatter": "ms-python.black-formatter",
         },
 
         // Exclude the following system python executables from the Jupyter kernel selection UI
