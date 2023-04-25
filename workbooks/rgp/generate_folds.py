@@ -6,8 +6,8 @@ HMB and GRU consent groups.
 Then, using tags downloaded from seqr, will divide the subjects based on presence of a particular tag at some specified
 ratio.
 
-The script will write out two family lists: train.txt and holdout.txt that will be used for partitioning of the RGP
-cohort.
+The script will write out a table with a boolean indicator of whether a particular familiy is
+in the training group or not.
 
 TODO: mechanism for adding new people? Those with relevant labels? Those without?
 TODO: mechanism for taking in previous fold specifications and updating them?
@@ -32,6 +32,8 @@ VCF_PATH = "~/data/rgp/samples.txt"
 
 # Path to seqr export of tags.
 SEQR_PATH = "~/data/rgp/tags.tsv"
+
+OUT_DF_PATH = "~/data/rgp/rgp_folds.tsv"
 
 # List of tags from the seqr export that will be used for partitioning families.
 # These are in precedence order, so in cases where multiple tags are present, the tag earlier in the list will take
@@ -366,10 +368,30 @@ print(f"Total number of families remaining: {len(fam_df)}")
 for tag in fam_df.seqr_tag.unique():
     print(f"{tag}: {len(fam_df.loc[fam_df.seqr_tag == tag])}")
 
+
 # %% Assign a group label to each family.
 
 
-probs = fam_df.groupby("seqr_tag").family_id.transform(lambda x: np.random.uniform(size=x.shape))
+def assign_probability(group_df: pd.DataFrame) -> np.ndarray:
+    """Assign a probability of being in the training set to each family."""
+    raw_probabilities = np.random.uniform(size=len(group_df))
+    p_eps = 1 / len(group_df)
+
+    # Fine tune the raw probabilities so we get as close to PARTITION_TRAIN as possible.
+    if (raw_probabilities < PARTITION_TRAIN).mean() < PARTITION_TRAIN:
+        # There are too few low values in raw_probabilities
+        while (raw_probabilities < PARTITION_TRAIN).mean() < PARTITION_TRAIN:
+            raw_probabilities[np.random.choice(len(raw_probabilities))] -= p_eps
+    elif (raw_probabilities < PARTITION_TRAIN).mean() > PARTITION_TRAIN:
+        # There are too many low values in raw_probabilities (too many families assigned to train)
+        while (raw_probabilities < PARTITION_TRAIN).mean() > PARTITION_TRAIN:
+            raw_probabilities[np.random.choice(len(raw_probabilities))] += p_eps
+
+    return raw_probabilities
+
+
+probs = fam_df.groupby("seqr_tag").family_id.transform(assign_probability)
+
 fam_df["is_train"] = probs < PARTITION_TRAIN
 
 # %% Double check our work to make sure we've got the right breakdown.
@@ -377,4 +399,8 @@ fam_df["is_train"] = probs < PARTITION_TRAIN
 for group in fam_df.groupby("seqr_tag"):
     print(f"{group[0]} (N={len(group[1].is_train)}): proportion train = {group[1].is_train.mean()}")
 
-# %% TODO: write out the groups.
+# %% Write out the groups
+print(f"Writing out the groups to {OUT_DF_PATH}")
+fam_df.drop(["in_vcf", "in_clin"], axis=1).set_index("family_id").to_csv(OUT_DF_PATH)
+
+# %%
