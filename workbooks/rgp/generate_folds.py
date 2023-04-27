@@ -16,6 +16,9 @@ TODO: mechanism for taking in previous fold specifications and updating them?
 
 # %% Imports.
 
+from collections import Counter, defaultdict
+from typing import DefaultDict, List
+
 import numpy as np
 import pandas as pd
 
@@ -23,17 +26,20 @@ import pandas as pd
 
 # Path to metadata table.
 CLIN_PATH = {
-    "HMB": "~/data/rgp/clinical_subjects_table_2023.04.13.tsv",
-    "GRU": "~/data/rgp/clinical_subjects_table_GRU_2023.04.24.tsv",
+    "HMB": "~/data/rgp/metadata/rare_genomes project_genomes_hmb_individuals.tsv",
+    "GRU": "~/data/rgp/metadata/rare_genomes project_genomes_gru_individuals.tsv",
 }
 
 # Path to sample list from vcf.
 VCF_PATH = "~/data/rgp/samples.txt"
 
 # Path to seqr export of tags.
-SEQR_PATH = "~/data/rgp/tags.tsv"
+SEQR_PATH = {
+    "HMB": "~/data/rgp/metadata/saved_all_variants_rare_genomes_project_genomes_hmb.tsv",
+    "GRU": "~/data/rgp/metadata/saved_all_variants_rare_genomes_project_genomes_gru.tsv",
+}
 
-OUT_DF_PATH = "~/data/rgp/rgp_folds.tsv"
+OUT_DF_PATH = "~/data/rgp/rgp_folds_new.tsv"
 
 # List of tags from the seqr export that will be used for partitioning families.
 # These are in precedence order, so in cases where multiple tags are present, the tag earlier in the list will take
@@ -106,10 +112,9 @@ def apply_tag_precedence(tag_list: str) -> str:
 
 # %% Read in data, do a teeny bit of formatting.
 clin_df = pd.DataFrame()
-
 for consent_group, path in CLIN_PATH.items():
     df = pd.read_csv(path, sep="\t")
-    df.rename(columns={"entity:subject_id": "subject_id"}, inplace=True)
+    df.rename(columns={"Family ID": "family_id", "Individual ID": "subject_id"}, inplace=True)
     df["consent_group"] = consent_group
     clin_df = pd.concat([clin_df, df], ignore_index=True) if not clin_df.empty else df
 
@@ -117,11 +122,38 @@ vcf_df = pd.read_csv(VCF_PATH, sep="\t", header=None)
 vcf_df.rename(columns={0: "subject_id"}, inplace=True)
 vcf_df["family_id"] = vcf_df.subject_id.apply(lambda x: "_".join(x.split("_")[0:2]))
 
-seqr_df = pd.read_csv(SEQR_PATH, sep="\t")
+seqr_df = pd.DataFrame()
+for consent_group, path in SEQR_PATH.items():
+    df = pd.read_csv(path, sep="\t")
+    df["consent_group"] = consent_group
+    seqr_df = pd.concat([seqr_df, df], ignore_index=True) if not seqr_df.empty else df
 
+# %% Manual hacks
+
+# Drop RGP_1848 one of the two copies of all the members of RGP_1848.
+# This family is present in both consent groups.
+for sid in ["RGP_1848_1", "RGP_1848_2", "RGP_1848_3"]:
+    clin_df.drop(clin_df.loc[(clin_df.subject_id == sid) & (clin_df.consent_group == "GRU")].index, inplace=True)
+
+
+# %% Print some basic info about the data.
 print(f"clin_df: {clin_df.shape}")
+print(f"  contains {clin_df.family_id.nunique()} families")
+print(
+    f"  contains {clin_df.loc[clin_df['Individual Data Loaded'] == 'Yes'].family_id.nunique()} "
+    "families with genetic data"
+)
 print(f"vcf_df: {vcf_df.shape}")
+print(f"  contains {vcf_df.family_id.nunique()} families")
+
 print(f"seqr_df: {seqr_df.shape}")
+print(f"  contains {seqr_df.family.nunique()} families")
+
+clin_all_families = clin_df.loc[clin_df["Individual Data Loaded"] == "Yes"].family_id.unique()
+vcf_all_families = vcf_df.family_id.unique()
+seqr_all_families = seqr_df.family.unique()
+all_families = np.unique(np.concatenate([clin_all_families, vcf_all_families, seqr_all_families]))
+print(f"all_families (with genetic data): {all_families.shape}")
 
 # %% The following sections apply to validating and pre-processing the seqr export table.
 # ##
@@ -203,105 +235,39 @@ for family, group_df in seqr_df.groupby("family"):
             seqr_families[family] = tag
             break
 
+# Show how many families have each tag.
+counter = Counter(seqr_families.values())
+tag_list = list(counter.keys())
+tag_list.sort()
+for tag in tag_list:
+    print(f"{tag}: {counter[tag]}")
+
 # %% The following sections apply to validating and pre-processing the clinical metadata table.
-# ##
-# ##
+#
+#
+#
+
+# %% Start by dropping subjects that do not have genetic data loaded, per the clinical metadata table.
+print(f"before filtering: {clin_df.family_id.nunique()} families")
+clin_df = clin_df.loc[clin_df["Individual Data Loaded"] == "Yes"]
+print(f"after filtering: {clin_df.family_id.nunique()} families")
+
+# %% Now drop all families for which no members of the family are affected.
+print(f"before filtering: {clin_df.family_id.nunique()} families")
+clin_df = clin_df.groupby("family_id").filter(lambda x: (x["Affected Status"] == "Affected").any())
+print(f"after filtering: {clin_df.family_id.nunique()} families")
+
 
 # %% We started by combining tables from potentially more than one source.
 # Validate that no subjects are listed more than once.
 if len(clin_df.subject_id) != len(set(clin_df.subject_id)):
     print("ERROR: Duplicate subjects found in clinical data table.")
+
+    for sid in clin_df.subject_id.unique():
+        if len(clin_df.loc[clin_df.subject_id == sid]) > 1:
+            print(f"ERROR: Duplicate subject found: {sid}")
 else:
     print("No duplicate subjects found in clinical data table.")
-
-# %% Validate that there is exactly one proband listed per family.
-
-errors = False
-families_missing_proband = []
-for family, group_df in clin_df.groupby("family_id"):
-    if (count := sum(group_df.proband_relationship == "Self")) > 1:
-        print(f"ERROR: More than one proband found for family: {family}")
-        print(group_df.loc[group_df.proband_relationship == "Self"]["subject_id"])
-        errors = True
-    if count == 0:
-        # Not throwing the following error: print(f"ERROR: No proband found for family: {family}")
-        families_missing_proband.append(family)
-        errors = True
-if not errors:
-    print("No errors found in proband validation.")
-else:
-    print(f"Errors found in proband validation for {len(families_missing_proband)} families.")
-    print(
-        clin_df.loc[clin_df.family_id.isin(families_missing_proband)]
-        .groupby("family_id")
-        .apply(lambda x: x.iloc[0].consent_group)
-        .value_counts()
-    )
-
-print(families_missing_proband)
-# As of April 2024, a total of 54 families are missing a proband annotation.
-# Notable that the GRU group, which is much smaller than the HMB group, has a much higher rate of missing probands.
-
-# Observing that there is no proband for family is not a blocking issue, it just means that we won't have HPO for that
-# particular proband (if we have genetic data), and that family structure will need to be inferred from other fields in
-# the metadata spreadsheet.
-
-# Potentially flag these missing data from the seqr team.
-
-# %% Other proband/HPO validation checks
-is_putative_proband = clin_df.subject_id.str.endswith("_3") & ~clin_df.subject_id.apply(has_subject_id_suffix)
-is_putative_mother = clin_df.subject_id.str.endswith("_1") & ~clin_df.subject_id.apply(has_subject_id_suffix)
-is_putative_father = clin_df.subject_id.str.endswith("_2") & ~clin_df.subject_id.apply(has_subject_id_suffix)
-
-missing_relationship = clin_df.proband_relationship.isna()
-
-# Determine which of the families that are missing a proband LACK a putative proband, where putative proband is
-# defined as a subject_id that ends in _3 and does not have a suffix (e.g., _fbs).
-clin_families_without_proband = set(families_missing_proband) - set(
-    clin_df.loc[clin_df.family_id.isin(families_missing_proband) & is_putative_proband].family_id
-)
-
-print(
-    f"The following {len(clin_families_without_proband)} families "
-    f"have no true or putative proband: {clin_families_without_proband}"
-)
-
-# Let's check to see if any of these families are in the VCF.
-vcf_families = set(vcf_df.subject_id.apply(lambda x: "_".join(x.split("_")[0:2])))
-for family in clin_families_without_proband:
-    if family in vcf_families:
-        print(f"ERROR: Family {family} is in the VCF.")
-
-# %%
-# Let's see if any of the families missing an annotated proband happen to have HPO terms for other family members.
-print(
-    clin_df.loc[clin_df.family_id.isin(families_missing_proband) & ~clin_df.hpo_present.isna()][
-        ["subject_id", "proband_relationship", "consent_group"]
-    ]
-)
-
-# Wow there are a bunch of them! And many seem to be putative probands given the subject_id (ending in _3).
-
-# %% Given the above, let's make a principled adjustment to proband_relationship in these cases where we have a
-# best guess as to which subject is the proband.
-
-do_infer_proband_self = (
-    clin_df.family_id.isin(families_missing_proband) & ~clin_df.hpo_present.isna() & is_putative_proband
-)
-
-do_infer_proband_mother = is_putative_mother & missing_relationship
-do_infer_proband_father = is_putative_father & missing_relationship
-
-# Print some stats on what we're going to change.
-print(f"Going to set {do_infer_proband_self.sum()} putative probands missing relationship to 'Self'")
-print(f"Going to set {do_infer_proband_mother.sum()} putative proband-mothers missing relationship to 'Mother'")
-print(f"Going to set {do_infer_proband_father.sum()} putative proband-fathers missing relationship to 'Father'")
-
-
-# Actually make the changes.
-clin_df.loc[do_infer_proband_self, "proband_relationship"] = "Self"
-clin_df.loc[is_putative_mother & missing_relationship, "proband_relationship"] = "Mother"
-clin_df.loc[is_putative_father & missing_relationship, "proband_relationship"] = "Father"
 
 # %% Logic for definining the list of families
 # Start with a union of the families included in the seqr output, the metadata table, and the VCF.
@@ -321,14 +287,16 @@ fam_df = pd.merge(
 
 fam_df["seqr_tag"] = fam_df.family_id.apply(lambda x: seqr_families.get(x, "untagged"))
 
+print(f"There are {len(fam_df)} families in total.")
+
 # Check to make sure that every family was in the clinical metadata tables.
 print(f"There were {len(fam_df) - fam_df.in_clin.sum()} absent from metadata")
 print(f"There were {len(fam_df) - fam_df.in_vcf.sum()} absent from VCF")
 
 # %% Trim out families that don't make the cut
 
-# remove families that are in clin_families_without_proband
-fam_df = fam_df.loc[~fam_df.family_id.isin(clin_families_without_proband)]
+# Remove families that are entirely absent from the clinical table.
+fam_df = fam_df.loc[fam_df.in_clin]
 
 # Remove families that are entirely absent from the VCF.
 fam_df = fam_df.loc[fam_df.in_vcf]
@@ -402,5 +370,112 @@ for group in fam_df.groupby("seqr_tag"):
 # %% Write out the groups
 print(f"Writing out the groups to {OUT_DF_PATH}")
 fam_df.drop(["in_vcf", "in_clin"], axis=1).set_index("family_id").to_csv(OUT_DF_PATH)
+
+# %% Build the pedigree files for the two groups.
+# See https://www.cog-genomics.org/plink/1.9/formats#fam for detail on the correct format.
+pedigree = clin_df.copy()
+pedigree.Sex = pedigree.Sex.map({"Female": 2, "Male": 1, "Unknown": 0})
+pedigree["Affected Status"] = pedigree["Affected Status"].map({"Affected": 2, "Unaffected": 1, "Unknown": 0})
+
+kept_cols = ["family_id", "subject_id", "Paternal ID", "Maternal ID", "Sex", "Affected Status"]
+
+# TODO
+TRAIN_PED_PATH = "~/data/rgp/rgp_train.fam"
+HOLDOUT_PED_PATH = "~/data/rgp/rgp_holdout.fam"
+
+# TODO Pedigree QC.
+# 1. Make sure that every family has at least one affected.
+# 2. Make sure that anyone with the _1 or _2 family suffixes are referred to by other family members?
+# 3. More?
+
+# %% Export the pedigrees.
+pedigree.loc[clin_df.family_id.isin(fam_df.loc[fam_df.is_train].family_id), kept_cols].to_csv(
+    TRAIN_PED_PATH, sep="\t", index=False, header=False
+)
+pedigree.loc[clin_df.family_id.isin(fam_df.loc[~fam_df.is_train].family_id), kept_cols].to_csv(
+    HOLDOUT_PED_PATH, sep="\t", index=False, header=False
+)
+
+
+# %% Build the HPO files for the two groups.
+
+
+def hpo_string_to_list(hpo_string: str) -> List[str]:
+    """Convert a semicolon-separated string of HPO terms to a list of HPO terms.
+
+    Remove parenthetical content and whitespace.
+    """
+    if not isinstance(hpo_string, str):
+        return []
+    hpo_terms = hpo_string.split(";")
+    hpo_terms = [term.split("(")[0].strip() for term in hpo_terms]
+    return hpo_terms
+
+
+# Build train and holdout_dicts from clin_df that follows this format.
+# Need to iterate over families, not individuals, since at this point clin_df and vcf_df are not consistent.
+train_dict = {}
+holdout_dict = {}
+for _, fam_row in fam_df.iterrows():
+    family = fam_row.family_id
+    is_train = fam_row.is_train
+
+    for _, clin_row in clin_df.loc[clin_df.family_id == family].iterrows():
+        subject = clin_row.subject_id
+        hpo_terms = clin_row["HPO Terms (present)"]
+
+        if is_train:
+            train_dict[subject] = {"family_id": family, "hpo_terms": hpo_string_to_list(hpo_terms)}
+        else:
+            holdout_dict[subject] = {"family_id": family, "hpo_terms": hpo_string_to_list(hpo_terms)}
+
+# TODO Write out the hpo files.
+
+# %% Build the tag files for the two groups.
+
+# Iterate through seqr_df and build a dictionary of tags for each family.
+
+# We will use the TAGS_OF_INTEREST to determine which tags to keep, and will only keep the highest priority tag for a
+# given variant/family. This was already pre-computed above.
+
+
+def is_valid_variant(var_row: pd.Series) -> bool:
+    """Returns true of chrom, pos, ref, and alt are all non-nan, false if otherwise."""
+    return not any(pd.isna(var_row[x]) for x in ["chrom", "pos", "ref", "alt"])
+
+
+train_tag_dict: DefaultDict[str, dict[str, List[str]]] = defaultdict(dict)
+holdout_tag_dict: DefaultDict[str, dict[str, List[str]]] = defaultdict(dict)
+
+for _, var_row in seqr_df.iterrows():
+    if not is_valid_variant(var_row):
+        continue
+    if var_row.tag not in TAGS_OF_INTEREST:
+        continue
+
+    fam_row = fam_df.loc[fam_df.family_id == var_row.family]
+    if len(fam_row) == 0:
+        continue
+
+    is_train = fam_row.is_train.values[0]
+
+    var_str = "-".join([str(var_row.chrom), str(var_row.pos), var_row.ref, var_row.alt])
+    likely_proband: str = next(
+        (x for x in var_row.filter(like="sample_").values if isinstance(x, str) and int(x.split("_")[2]) >= 3),
+        "",
+    )
+
+    if not likely_proband:
+        print(f"Error: no proband candidate found for variant {var_str} in family {var_row.family}")
+        continue
+
+    print(f"Adding variant {var_str} to family {var_row.family}, likely proband {likely_proband}")
+
+    if is_train:
+        train_tag_dict[likely_proband][var_str] = var_row.tag
+    else:
+        holdout_tag_dict[likely_proband][var_str] = var_row.tag
+
+# TODO Write out the tag files.
 
 # %%
