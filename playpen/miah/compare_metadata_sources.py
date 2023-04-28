@@ -45,11 +45,7 @@ seqr_df = seqr_df.loc[seqr_df["subject_id"].isin(terra_df["subject_id"])]
 # %%
 joined = pd.merge(seqr_df, terra_df, how="inner", on="subject_id")
 
-
-import re
-
 # %% check some basic column equivalence
-import pandas as pd
 
 
 def match_hpo_value(s1, s2, split_token1, split_token2):
@@ -75,7 +71,7 @@ def find_hpo_differences(df, col1, col2):
 
 col_pairs = [
     ("HPO Terms (present)", "hpo_present"),
-    # ("HPO Terms (absent)", "hpo_absent"),
+    ("HPO Terms (absent)", "hpo_absent"),
 ]
 
 for col1, col2 in col_pairs:
@@ -91,10 +87,8 @@ def find_differences(df, col1, col2, print_differences=False):
 
 
 col_pairs = [
-    ("HPO Terms (present)", "hpo_present"),
-    # ("HPO Terms (absent)", "hpo_absent"),
-    # ("consent_group_x", "consent_group_y"),
-    # ("Affected Status", "affected_status"),
+    ("consent_group_x", "consent_group_y"),
+    ("Affected Status", "affected_status"),
 ]
 
 for col1, col2 in col_pairs:
