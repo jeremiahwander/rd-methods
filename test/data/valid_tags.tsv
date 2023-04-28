@@ -1,0 +1,8 @@
+family	tags
+"single_tag"	"Known gene for phenotype"
+"multi_tag"	"Known gene for phenotype|Tier 1 - Novel gene and phenotype"
+"multi_var"	"Known gene for phenotype"
+"multi_both"	"Known gene for phenotype|Tier 1 - Novel gene and phenotype"
+"multi_both"	"Review|Tier 2 - Known gene, new phenotype"
+"no_tag"	""
+"disinteresting"	"Review"
