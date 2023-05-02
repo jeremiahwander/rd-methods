@@ -171,7 +171,7 @@ class SeqrSubjects:
         """Parse HPO terms from a string."""
         if pd.isna(hpo_terms) or not hpo_terms:
             return []
-        return [term.split("(")[0].strip() for term in hpo_terms.split("|")]
+        return [term.split("(")[0].strip() for term in hpo_terms.split(";")]
 
     def get_hpo_terms_present(self, subject_id: str) -> List[str]:
         """Return the list of HPO terms present for a given subject ID."""
