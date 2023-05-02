@@ -1,6 +1,7 @@
 Family ID	Individual ID	Paternal ID	Maternal ID	Sex	Affected Status	Notes	Individual Data Loaded	HPO Terms (present)	HPO Terms (absent)
-"RGP_123"	"RGP_123_3"	"RGP_123_2"	"RGP_123_1"	"Male"	"Affected"	""	"Yes"	""	""
-"RGP_123"	"RGP_123_1"	""	""	"Female"	"Unaffected"	""	"Yes"	""	""
+"RGP_123"	"RGP_123_3"	"RGP_123_2"	"RGP_123_1"	"Male"	"Affected"	""	"Yes"	"HP:000001 (Some string) | HP:000002 (Some other string)"	""
+"RGP_123"	"RGP_123_1"	""	""	"Female"	"Affected"	""	"Yes"	"HP:000002 (Some other string)"	""
 "RGP_123"	"RGP_123_2"	""	""	"Male"	"Unaffected"	""	"Yes"	""	""
 "RGP_321"	"RGP_321_1"	""	""	"Female"	"Unaffected"	""	"No"	""	""
 "RGP_321"	"RGP_321_2"	""	""	"Male"	"Unaffected"	""	"No"	""	""
+"RGP_321"	"RGP_321_4"	""	""	"Unknown"	"Unaffected"	""	"No"	""	""

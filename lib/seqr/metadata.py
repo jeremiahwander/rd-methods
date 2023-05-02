@@ -134,10 +134,14 @@ class SeqrSubjects:
         self.df = self.df[self.df["Family ID"] != family_id]
 
     def _get_string_field(self, subject_id: str, field: str) -> str:
-        """Return a string field for a given subject ID."""
+        """Return a string field for a given subject ID.
+
+        If the value for the field is missing, return an empty string.
+        """
         if subject_id not in self.get_subjects():
             raise ValueError(f"Subject ID '{subject_id}' not found.")
-        return self.df[self.df["Individual ID"] == subject_id][field].values[0]
+        value = self.df[self.df["Individual ID"] == subject_id][field].values[0]
+        return "" if pd.isna(value) else value
 
     def is_affected(self, subject_id: str) -> bool:
         """Return whether or not a subject is affected."""
@@ -152,11 +156,11 @@ class SeqrSubjects:
         return self._get_string_field(subject_id, "Family ID")
 
     def get_paternal_id(self, subject_id: str) -> str:
-        """Return the paternal ID of a subject."""
+        """Return the paternal ID of a subject. If no paternal ID is present, return an empty string."""
         return self._get_string_field(subject_id, "Paternal ID")
 
     def get_maternal_id(self, subject_id: str) -> str:
-        """Return the maternal ID of a subject."""
+        """Return the maternal ID of a subject. If no maternal ID is present, an empty string."""
         return self._get_string_field(subject_id, "Maternal ID")
 
     def is_data_loaded(self, subject_id: str) -> bool:
@@ -165,7 +169,7 @@ class SeqrSubjects:
 
     def _parse_hpo_terms(self, hpo_terms: str) -> List[str]:
         """Parse HPO terms from a string."""
-        if pd.isna(hpo_terms):
+        if pd.isna(hpo_terms) or not hpo_terms:
             return []
         return [term.split("(")[0].strip() for term in hpo_terms.split("|")]
 

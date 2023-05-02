@@ -4,7 +4,7 @@ import json
 from typing import List, Protocol
 
 
-class IProvidePedigreeInfo(Protocol):
+class IProvidePedigreeInfo(Protocol):  # pragma: no cover
     def get_subjects(self) -> List[str]:
         ...
 
@@ -50,15 +50,18 @@ class PedigreeWriter:
             return "1"
 
     def _get_pedigree_line(self, subject: str) -> str:
-        return "\t".join(
-            [
-                self._pedigree_info.get_family_id(subject),
-                subject,
-                self._pedigree_info.get_paternal_id(subject),
-                self._pedigree_info.get_maternal_id(subject),
-                self._encode_sex(self._pedigree_info.get_sex(subject)),
-                self._encode_affected(self._pedigree_info.is_affected(subject)),
-            ]
+        return (
+            "\t".join(
+                [
+                    self._pedigree_info.get_family_id(subject),
+                    subject,
+                    self._pedigree_info.get_paternal_id(subject),
+                    self._pedigree_info.get_maternal_id(subject),
+                    self._encode_sex(self._pedigree_info.get_sex(subject)),
+                    self._encode_affected(self._pedigree_info.is_affected(subject)),
+                ]
+            )
+            + "\n"
         )
 
     def write(self, path: str) -> None:
@@ -73,7 +76,7 @@ class PedigreeWriter:
                 f.write(self._get_pedigree_line(subject))
 
 
-class IProvideHpoInfo(Protocol):
+class IProvideHpoInfo(Protocol):  # pragma: no cover
     def get_subjects(self) -> List[str]:
         ...
 
