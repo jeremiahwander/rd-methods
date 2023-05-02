@@ -1,6 +1,6 @@
 import pytest
 
-from src.seqr.metadata import SeqrTags
+from lib.seqr.metadata import SeqrTags
 
 TEST_FILEPATH = "test/data/valid_tags.tsv"
 

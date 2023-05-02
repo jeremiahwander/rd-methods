@@ -1,6 +1,6 @@
 import pytest
 
-from src.seqr.metadata import SeqrSubjects
+from lib.seqr.metadata import SeqrSubjects
 
 TEST_FILEPATH = "test/data/valid_subjects.tsv"
 
