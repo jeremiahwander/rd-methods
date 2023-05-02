@@ -34,7 +34,7 @@ from typing import List
 
 import pandas as pd
 
-from src.seqr.metadata import SeqrSubjects, SeqrTags
+from lib.seqr.metadata import SeqrSubjects, SeqrTags
 
 # This should never be changed.
 PROP_TRAIN = 0.5
