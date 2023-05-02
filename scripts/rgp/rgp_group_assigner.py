@@ -21,7 +21,7 @@ Options:
                             e.g., --seqr_indiv indiv1.tsv --seqr_indiv indiv2.tsv. Multiple files are concatenated.
     --seqr_tag FILE         path to an export of all tagged variants from seqr, can be defined multiple times, e.g.,
                             --seqr_tag tag1.tsv --seqr_tag tag2.tsv. Multiple files are concatenated.
-    --samples FILE          [optional] list of samples for which genetic data are available. If provided, only families 
+    --samples FILE          [optional] list of samples for which genetic data are available. If provided, only families
                             for whom we have genetic data for all family members in `indiv` will be considered.
     --history FILE          [optional] output from a previous run of this script, used to ensure historical consistency.
     --output FILE           output filepath for group assignments, written as a tab-delimited file.
