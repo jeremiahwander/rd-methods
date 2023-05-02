@@ -1,8 +1,9 @@
-family	tags
-"single_tag"	"Known gene for phenotype"
-"multi_tag"	"Known gene for phenotype|Tier 1 - Novel gene and phenotype"
-"multi_var"	"Known gene for phenotype"
-"multi_both"	"Known gene for phenotype|Tier 1 - Novel gene and phenotype"
-"multi_both"	"Review|Tier 2 - Known gene, new phenotype"
-"no_tag"	""
-"disinteresting"	"Review"
+chrom	pos	ref	alt	family	tags
+"1"	"1"	"A"	"T"	"single_tag"	"Known gene for phenotype"
+"1"	"1"	"A"	"T"	"multi_tag"	"Known gene for phenotype|Tier 1 - Novel gene and phenotype"
+"1"	"1"	"A"	"T"	"multi_var"	"Known gene for phenotype"
+"1"	"2"	"C"	"G"	"multi_var"	"Review|Tier 2 - Known gene, new phenotype"
+"1"	"1"	"A"	"T"	"multi_both"	"Known gene for phenotype|Tier 1 - Novel gene and phenotype"
+"1"	"2"	"C"	"G"	"multi_both"	"Review|Tier 2 - Known gene, new phenotype"
+"1"	"1"	"A"	"T"	"no_tag"	""
+"1"	"1"	"A"	"T"	"disinteresting"	"Review"
