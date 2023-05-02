@@ -133,14 +133,42 @@ class SeqrSubjects:
             raise ValueError(f"Family ID '{family_id}' not found.")
         self.df = self.df[self.df["Family ID"] != family_id]
 
-    def is_data_loaded(self, subject_id: str) -> bool:
-        """Return whether or not data are loaded for a given subject ID."""
+    def _get_string_field(self, subject_id: str, field: str) -> str:
+        """Return a string field for a given subject ID."""
         if subject_id not in self.get_subjects():
             raise ValueError(f"Subject ID '{subject_id}' not found.")
-        return self.df[self.df["Individual ID"] == subject_id]["Individual Data Loaded"].values[0] == "Yes"
+        return self.df[self.df["Individual ID"] == subject_id][field].values[0]
 
     def is_affected(self, subject_id: str) -> bool:
         """Return whether or not a subject is affected."""
-        if subject_id not in self.get_subjects():
-            raise ValueError(f"Subject ID '{subject_id}' not found.")
-        return self.df[self.df["Individual ID"] == subject_id]["Affected Status"].values[0] == "Affected"
+        return self._get_string_field(subject_id, "Affected Status") == "Affected"
+
+    def get_sex(self, subject_id: str) -> str:
+        """Return the sex of a subject."""
+        return self._get_string_field(subject_id, "Sex")
+
+    def get_family_id(self, subject_id: str) -> str:
+        """Return the family ID of a subject."""
+        return self._get_string_field(subject_id, "Family ID")
+
+    def get_paternal_id(self, subject_id: str) -> str:
+        """Return the paternal ID of a subject."""
+        return self._get_string_field(subject_id, "Paternal ID")
+
+    def get_maternal_id(self, subject_id: str) -> str:
+        """Return the maternal ID of a subject."""
+        return self._get_string_field(subject_id, "Maternal ID")
+
+    def is_data_loaded(self, subject_id: str) -> bool:
+        """Return whether or not data are loaded for a given subject ID."""
+        return self._get_string_field(subject_id, "Individual Data Loaded") == "Yes"
+
+    def _parse_hpo_terms(self, hpo_terms: str) -> List[str]:
+        """Parse HPO terms from a string."""
+        if pd.isna(hpo_terms):
+            return []
+        return [term.split("(")[0].strip() for term in hpo_terms.split("|")]
+
+    def get_hpo_terms_present(self, subject_id: str) -> List[str]:
+        """Return the list of HPO terms present for a given subject ID."""
+        return self._parse_hpo_terms(self._get_string_field(subject_id, "HPO Terms (present)"))
