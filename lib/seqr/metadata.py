@@ -25,11 +25,20 @@ class SeqrTags:
     def __init__(self, df: pd.DataFrame) -> None:
         self._validate_input_df(df)
         self.df = df
+        self._add_variant_ids()
 
     def _validate_input_df(self, df: pd.DataFrame) -> None:
-        for col in ["family", "tags"]:
+        for col in ["chrom", "pos", "ref", "alt", "family", "tags"]:
             if col not in df.columns:
                 raise ValueError(f"Input dataframe must contain column '{col}'.")
+
+    def _add_variant_ids(self) -> None:
+        # Add a variant ID column to the dataframe.
+        self.df["variant_id"] = self.df.apply(self._variant_to_string, axis=1)
+
+    def _variant_to_string(self, row: pd.Series) -> str:
+        # Helper function to convert variant info to a String ID."""
+        return f"{row['chrom']}-{row['pos']}-{row['ref']}-{row['alt']}"
 
     @classmethod
     def parse(cls, tag_paths: str | List[str]) -> "SeqrTags":
@@ -69,6 +78,27 @@ class SeqrTags:
                 continue
             tags.update(row["tags"].split("|"))
         return list(tags)
+
+    def get_families(self) -> List[str]:
+        """Return a list of all family IDs."""
+        return self.df["family"].unique().tolist()
+
+    def get_variants_for_family(self, family_id: str) -> List[str]:
+        """Return all variant_ids corresponding to a given family ID.
+
+        Variant is specified by a string of the form <chromosome>-<position>-<reference>-<alternate>.
+        """
+        variants = self.df[self.df["family"] == family_id]
+        return [self._variant_to_string(row) for _, row in variants.iterrows()]
+
+    def get_tags_for_family_and_variant(self, family_id: str, variant_id: str) -> List[str]:
+        """Get all tags for a given family ID and variant ID."""
+        variant = self.df[(self.df["family"] == family_id) & (self.df["variant_id"] == variant_id)]
+        if variant.empty:
+            raise ValueError(f"Variant {variant_id} not found for family {family_id}.")
+        if pd.isna(variant["tags"].values[0]):
+            return []
+        return variant["tags"].values[0].split("|")
 
 
 class SeqrSubjects:

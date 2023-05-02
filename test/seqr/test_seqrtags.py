@@ -50,3 +50,44 @@ def test_get_highest_precedence_tag(sample_tags):
 
     # Get the highest precedence tag where the family ID is not in the tags.
     assert sample_tags.get_highest_precedence_tag("not_in_tags") is None
+
+
+def test_get_families(sample_tags):
+    # Get all families.
+    assert sample_tags.get_families() == [
+        "single_tag",
+        "multi_tag",
+        "multi_var",
+        "multi_both",
+        "no_tag",
+        "disinteresting",
+    ]
+
+
+def test_get_variants_for_family(sample_tags):
+    # Get the variants for a family with a single variant.
+    assert sample_tags.get_variants_for_family("single_tag") == ["1-1-A-T"]
+
+    # Get the variants for a family with multiple variants.
+    assert sample_tags.get_variants_for_family("multi_var") == ["1-1-A-T", "1-2-C-G"]
+
+    # Get the variants for a family with no variants.
+    assert sample_tags.get_variants_for_family("not_in_tags") == []
+
+
+def test_get_tags_for_family_and_variant(sample_tags):
+    # Get the tags for a family with a single variant.
+    assert sample_tags.get_tags_for_family_and_variant("single_tag", "1-1-A-T") == ["Known gene for phenotype"]
+
+    # Get the tags for a family with multiple tags for a single variant.
+    assert sample_tags.get_tags_for_family_and_variant("multi_tag", "1-1-A-T") == [
+        "Known gene for phenotype",
+        "Tier 1 - Novel gene and phenotype",
+    ]
+
+    # Get tags for a family/variant with no tags assigned.
+    assert sample_tags.get_tags_for_family_and_variant("no_tag", "1-1-A-T") == []
+
+    # Get the tags for a family with no variants.
+    with pytest.raises(ValueError):
+        sample_tags.get_tags_for_family_and_variant("not_in_tags", "1-1-A-T")
