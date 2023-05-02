@@ -33,15 +33,21 @@ from lib.seqr.metadata import SeqrSubjects
 
 
 def main(seqr_indiv: List[str], group_assignments: str, output_dir: str) -> None:
+    if not os.path.exists(output_dir):
+        logging.warning(f"Output directory {output_dir} does not exist, creating it.")
+        os.makedirs(output_dir)
+
     indiv = SeqrSubjects.parse(seqr_indiv)
 
     assignments = pd.read_csv(group_assignments, sep="\t")
 
     for group, group_df in assignments.groupby("group"):
-        PedigreeWriter(indiv, families_to_write=group_df.family_id.tolist()).write(
-            os.path.join(output_dir, f"{group}.fam")
-        )
-        HpoWriter(indiv, families_to_write=group_df.family_id.tolist()).write(os.path.join(output_dir, f"{group}.json"))
+        pedigree_file = os.path.join(output_dir, f"{group}_pedigree.fam")
+        logging.info(f"Writing pedigree file for {group} to {pedigree_file}")
+        PedigreeWriter(indiv, families_to_write=group_df.family_id.tolist()).write(pedigree_file)
+        hpo_file = os.path.join(output_dir, f"{group}_hpo.json")
+        logging.info(f"Writing HPO file for {group} to {hpo_file}")
+        HpoWriter(indiv, families_to_write=group_df.family_id.tolist()).write(hpo_file)
 
 
 if __name__ == "__main__":
