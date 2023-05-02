@@ -28,8 +28,8 @@ from typing import List
 
 import pandas as pd
 
-from src.seqr.io import HpoWriter, PedigreeWriter
-from src.seqr.metadata import SeqrSubjects
+from lib.seqr.io import HpoWriter, PedigreeWriter
+from lib.seqr.metadata import SeqrSubjects
 
 
 def main(seqr_indiv: List[str], group_assignments: str, output_dir: str) -> None:
