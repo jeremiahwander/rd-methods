@@ -95,6 +95,7 @@ def main(
         data={
             "family_id": indiv.get_families(),
             "group": None,
+            "indiv_ids": ["|".join(indiv.get_subjects_for_family(family)) for family in indiv.get_families()],
             "tag": [tags.get_highest_precedence_tag(family) for family in indiv.get_families()],
         }
     ).set_index("family_id")
