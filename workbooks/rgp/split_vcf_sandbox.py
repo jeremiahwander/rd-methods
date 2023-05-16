@@ -51,14 +51,11 @@ VCF_PATH = "/mnt/data/rgp/1kg.vcf.bgz"
 # Group assignment file path.
 GROUPS_PATH = "~/data/rgp/group_assignments.tsv"
 
-
 # %% Configure Hail.
 hl.init()
 
 # %% Load the VCF into a Hail MatrixTable.
-mt = hl.import_vcf(VCF_PATH, reference_genome="GRCh38")
-
-vcf_samples = mt.s.collect()
+mt = hl.import_vcf(VCF_PATH, reference_genome="GRCh38", n_partitions=50)
 
 # %% Load the group assignments.
 groups_df = pd.read_csv(GROUPS_PATH, sep="\t")
@@ -67,19 +64,29 @@ samples_to_keep = defaultdict(list)
 for group, group_df in groups_df.groupby("group"):
     samples_to_keep[group] = group_df["indiv_ids"].str.split("|").explode().tolist()
 
-# %% Error checking.
-# Are there samples in samples_to_keep that aren't in the VCF?
 all_kept_samples = [ssub for s in samples_to_keep.values() for ssub in s]
-missing_from_vcf = set(all_kept_samples) - set(vcf_samples)
-if missing_from_vcf:
-    raise ValueError(f"Samples {missing_from_vcf} are in the group assignment but missing from the VCF.")
+
+
+samples_ht = hl.Table.parallelize(hl.literal([{"s": id} for id in all_kept_samples], "array<struct{s:str}>")).key_by(
+    "s"
+)
+
+# %% Error checking.
+
+# Are there samples in the VCF that aren't in the samples list?
+extra_in_vcf_ht = mt.cols().anti_join(samples_ht)
+if extra_in_vcf_ht.count() > 0:
+    missing_from_vcf = extra_in_vcf_ht.s.collect()
+    print(f"Samples {missing_from_vcf} are in the group assignment but missing from the VCF.")
 else:
     print("No samples are in the group assignment but missing from the VCF.")
 
-# Are there samples in the VCF that aren't in samples_to_keep?
-missing_from_group_assignments = set(vcf_samples) - set(all_kept_samples)
-if missing_from_group_assignments:
-    raise ValueError(f"Samples {missing_from_group_assignments} are in the VCF but missing from the group assignments.")
+# %%
+# Are there samples in the in samples_to_keep that aren't in the VCF?
+extra_in_assignments_ht = samples_ht.anti_join(mt.cols())
+if extra_in_assignments_ht.count() > 0:
+    missing_from_assignments = extra_in_assignments_ht.s.collect()
+    print(f"Samples {missing_from_assignments} are in the VCF but missing from the group assignments.")
 else:
     print("No samples are in the VCF but missing from the group assignments.")
 
