@@ -46,16 +46,21 @@ import pandas as pd
 # VCF Path. If this path points to a .bgz file, an appropriate index file must also exist.
 # Currently only GRCh38 is supported. This isn't really relevant for the purposes of this script, but Hail requires
 # that we specify reference genome, so we will.
-VCF_PATH = "/mnt/data/rgp/1kg.vcf.bgz"
+# VCF_PATH = "/mnt/data/rgp/1kg.vcf.bgz"
+# VCF_PATH = "hail-az://sevgen002sa/test/reanalysis/2022-11-15/prior_to_annotation.vcf.bgz"
+VCF_PATH = "hail-az://raregen001sa/test/inputs/rgp/rgp_all.vcf.bgz"
 
 # Group assignment file path.
 GROUPS_PATH = "~/data/rgp/group_assignments.tsv"
+# GROUPS_PATH = "~/data/1kg/group_assignments.tsv"
 
 # %% Configure Hail.
 hl.init()
 
 # %% Load the VCF into a Hail MatrixTable.
 mt = hl.import_vcf(VCF_PATH, reference_genome="GRCh38", n_partitions=50)
+
+print("done importing VCF")
 
 # %% Load the group assignments.
 groups_df = pd.read_csv(GROUPS_PATH, sep="\t")
@@ -77,18 +82,18 @@ samples_ht = hl.Table.parallelize(hl.literal([{"s": id} for id in all_kept_sampl
 extra_in_vcf_ht = mt.cols().anti_join(samples_ht)
 if extra_in_vcf_ht.count() > 0:
     missing_from_vcf = extra_in_vcf_ht.s.collect()
-    print(f"Samples {missing_from_vcf} are in the group assignment but missing from the VCF.")
+    print(f"Samples {missing_from_vcf} are in the VCF but missing from the group assignment.")
 else:
-    print("No samples are in the group assignment but missing from the VCF.")
+    print("No samples are in the VCF but missing from the group assignment.")
 
 # %%
 # Are there samples in the in samples_to_keep that aren't in the VCF?
 extra_in_assignments_ht = samples_ht.anti_join(mt.cols())
 if extra_in_assignments_ht.count() > 0:
     missing_from_assignments = extra_in_assignments_ht.s.collect()
-    print(f"Samples {missing_from_assignments} are in the VCF but missing from the group assignments.")
+    print(f"Samples {missing_from_assignments} are in the group assignment but missing from the VCF.")
 else:
-    print("No samples are in the VCF but missing from the group assignments.")
+    print("No samples are in the group assignment but missing from the VCF.")
 
 # %% Write out group assignments to file so that hail can use them.
 
