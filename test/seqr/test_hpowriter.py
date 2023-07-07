@@ -15,7 +15,7 @@ def sample_subjects():
 
 @pytest.fixture(scope="session")
 def output_file(tmp_path_factory):
-    return tmp_path_factory.mktemp("data") / "out.fam"
+    return tmp_path_factory.mktemp("data") / "out.json"
 
 
 def test_write(sample_subjects, output_file):
