@@ -40,6 +40,7 @@ def test_write(sample_subjects, output_file):
             }
         )
         .drop(columns=["Notes", "Individual Data Loaded", "HPO Terms (present)", "HPO Terms (absent)"])
+        .fillna("0")
     )
 
     test_df.sex = test_df.sex.map({"Male": 1, "Female": 2, "Unknown": 0})
@@ -72,6 +73,7 @@ def test_write_with_families(sample_subjects, output_file):
             }
         )
         .drop(columns=["Notes", "Individual Data Loaded", "HPO Terms (present)", "HPO Terms (absent)"])
+        .fillna("0")
         .loc[lambda df: df.family_id.isin(families)]
     )
 

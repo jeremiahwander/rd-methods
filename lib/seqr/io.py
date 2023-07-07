@@ -50,14 +50,19 @@ class PedigreeWriter:
         else:
             return "1"
 
+    def _encode_parent(self, parent: str) -> str:
+        if parent:
+            return parent
+        return "0"
+
     def _get_pedigree_line(self, subject: str) -> str:
         return (
             "\t".join(
                 [
                     self._pedigree_info.get_family_id(subject),
                     subject,
-                    self._pedigree_info.get_paternal_id(subject),
-                    self._pedigree_info.get_maternal_id(subject),
+                    self._encode_parent(self._pedigree_info.get_paternal_id(subject)),
+                    self._encode_parent(self._pedigree_info.get_maternal_id(subject)),
                     self._encode_sex(self._pedigree_info.get_sex(subject)),
                     self._encode_affected(self._pedigree_info.is_affected(subject)),
                 ]
